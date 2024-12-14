@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Echo Link</title>
+    <title>Three-Party Call</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="./assets/css/bootstrap.css" rel="stylesheet">
     <link href="./assets/css/bootstrap-responsive.css" rel="stylesheet">
@@ -10,271 +10,188 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style type="text/css">
         body {
-            cursor: wait;
-        }
-    
-        .video-container.fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-        }
-    
-        .div-video {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: calc(100% - 10%); /* Reserve space for the footer (10% of the screen) */
-            background-color: #000;
-            position: relative;
-        }
-    
-        .remote-video {
-            width: 85%; /* Larger than the local video */
-            height: 85%; /* Maintain aspect ratio */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #000;
-        }
-    
-        .remote-video video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* Ensure the video fits without cropping */
-        }
-    
-        .local-video {
-            position: absolute;
-            bottom: 5%;
-            right: 5%;
-            width: 20%; /* Adjust width for local video */
-            height: auto; /* Maintain aspect ratio */
-            background-color: rgba(0, 0, 0, 0.7);
-            border: 2px solid #fff;
-            border-radius: 8px;
-            z-index: 1000;
-        }
-    
-        .local-video video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* Ensure local video scales proportionally */
-            border-radius: 8px;
-        }
-    
-        .footer {
-            width: 100%;
-            height: 10%; /* Footer takes 10% of the screen height */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.8);
-        }
-    
-        .footer button {
-            padding: 10px 5%;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            color: #fff;
-            transition: background-color 0.3s ease;
-        }
-    
-        .footer button.hangup {
-            background-color: #dc2626;
-        }
-    
-        .footer button.hangup:hover {
-            background-color: #b91c1c;
-        }
-    
-        .footer button.answer {
-            background-color: #16a34a;
-        }
-    
-        .footer button.answer:hover {
-            background-color: #15803d;
-        }
-        #txtCallStatus {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: black;
-            padding: 5px 10px;
-            border-radius: 5px;
-            z-index: 1000;
-            font-size: 16px;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
         }
 
+        .container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .video-frame {
+            position: relative;
+            width: 30%;  /* Increased width */
+            aspect-ratio: 16 / 12;
+            background-color: #000;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px; /* Ensure there is space between the rows */
+        }
+
+        .video-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 10px auto;
+            max-width: 1200px;
+            padding: 5px;
+            gap: 5px;
+        }
+
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .video-frame label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        #txtCallStatus {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .controls {
+            margin: 20px auto;
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+        }
+
+        .controls input {
+            width: 60%;
+            max-width: 300px;
+            padding: 10px;
+            margin: 10px 5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #btnCall {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        #btnCall:hover {
+            background-color: #1d4ed8;
+        }
+
+        .controls button.call-remote-1 {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .controls button.call-remote-1:hover {
+            background-color: #059669;
+        }
+
+        .controls button.call-remote-2 {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .controls button.call-remote-2:hover {
+            background-color: #d97706;
+        }
+
+        #hangupButton {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        #hangupButton:hover {
+            background-color: #b91c1c;
+        }
+
+        #btnAnswer {
+            background-color: #16a34a;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        #btnAnswer:hover {
+            background-color: #15803d;
+        }
     </style>
-    
 </head>
 <body>
     <div class="container">
-        <div class="row-fluid">
-            <label style="width: 100%;" align="center" id="txtRegStatus"></label>
-            <label id="txtCallStatus" style="width: 100%;" align="center"></label>
-            <br>                             
+        <!-- Status Indicators -->
+        <div>
+            <label id="txtRegStatus"></label>
+            <label id="txtCallStatus"></label>
         </div>
     </div>
     
-    <div class="video-container hidden" id="divVideo">
-        <div class="header">
-            <label id="txtCallStatus" style="width: 100%; color: white; text-align: center; font-size: 1.2em; margin-top: 10px;"></label>
+    <!-- Video Frames -->
+    <div class="video-container" id="divVideo">
+        <!-- Local Video -->
+        <div id="divVideoLocalWrapper" class="video-frame">
+            <label id="txtLocal">Local</label>
+            <video id="video_local" autoplay muted></video>
         </div>
-        <div class="div-video">
-            <!-- Remote Video Container -->
-            <div id="divVideoRemote" class="remote-video">
-                <video id="video_remote" autoplay></video>
-            </div>
-            <!-- Local Video (Picture-in-Picture) -->
-            <div id="divVideoLocalWrapper" class="local-video">
-                <video id="video_local" autoplay muted></video>
-            </div>
-        </div>
-        <div class="footer">
-            <button class="hangup" id="hangupButton" onclick="hangUp();">Hang Up</button>
-            <button class="answer" id="btnAnswer" style="display: none;" onclick="answerCall();">Answer</button>
-        </div>
-    </div>   
-    
 
-    <div id="app" class="min-h-[calc(100vh-12rem)] flex items-center justify-center p-4">
-        <div id="container" class="bg-white rounded-lg shadow-xl overflow-hidden transition-all duration-300 w-full max-w-sm">
-            <div class="flex justify-center space-x-4 p-4 bg-gray-50 border-b border-gray-200">
-                <button id="dialpadTab" class="flex items-center justify-center px-4 py-2 rounded-full transition-all duration-200 bg-blue-500 text-white shadow-md">
-                    <i class="lucide-phone mr-2"></i>
-                    Dialpad
-                </button>
-                <button id="contactsTab" class="flex items-center justify-center px-4 py-2 rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-blue-100">
-                    <i class="lucide-users mr-2"></i>
-                    Contacts
-                </button>
-            </div>
-    
-            <div id="content" class="p-4">
-                <!-- Dialpad Section -->
-                <div id="dialpad" class="flex flex-col items-center space-y-4 w-full max-w-xs mx-auto">
-                    <div class="w-64 bg-gray-100 border border-gray-300 rounded-md shadow-sm max-h-screen">
-                        <input type="text" id="txtPhoneNumber" value="" placeholder="Enter phone number to call" class="w-full h-full p-2 text-lg focus:outline-none">
-                    </div>
-    
-                    <div class="grid grid-cols-3 gap-2">
-                        <!-- Buttons will be dynamically added here -->
-                    </div>
-    
-                    <div class="flex justify-between w-64 space-x-4">
-                        <button id="btnClear" class="btn btn-secondary bg-gray-300 hover:bg-gray-400 text-black" onclick="clearNumber();">Clear</button>
-                        <button id="btnCall" class="btn btn-primary bg-blue-500 text-white" onclick="sipCall('call-audiovideo');">Call</button>
-                    </div>
-                </div>
-    
-                <!-- Contacts Section -->
-                <div id="contacts" class="hidden grid grid-cols-4 gap-8">
-                    <div onclick="sipCalll701();" class="flex flex-col items-center bg-white p-4 rounded-lg shadow-lg hover:shadow-2xl transition">
-                        <img src="tino.png" alt="Tino" class="w-20 h-20 rounded-full object-cover border-2 border-blue-500">
-                        <h3 class="mt-4 text-lg font-semibold text-gray-700">Tino</h3>
-                        <p class="text-sm text-gray-500">SIP: 701</p>
-                    </div>
-                    <div onclick="sipCalll702();" class="flex flex-col items-center bg-white p-4 rounded-lg shadow-lg hover:shadow-2xl transition">
-                        <img src="sarath.png" alt="Sarath" class="w-20 h-20 rounded-full object-cover border-2 border-blue-500">
-                        <h3 class="mt-4 text-lg font-semibold text-gray-700">Sarath</h3>
-                        <p class="text-sm text-gray-500">SIP: 702</p>
-                    </div>
-                    <div onclick="sipCalll703();" class="flex flex-col items-center bg-white p-4 rounded-lg shadow-lg hover:shadow-2xl transition">
-                        <img src="sarath.png" alt="Sarath" class="w-20 h-20 rounded-full object-cover border-2 border-blue-500">
-                        <h3 class="mt-4 text-lg font-semibold text-gray-700">Sarath</h3>
-                        <p class="text-sm text-gray-500">SIP: 703</p>
-                    </div>
-                </div>
-            </div>
+        <!-- Remote Video 1 -->
+        <div id="divVideoRemote1" class="video-frame">
+            <label id="txtRemote1">Remote 1</label>
+            <video id="video_remote1" autoplay></video>
+        </div>
+
+        <!-- Remote Video 2 -->
+        <div id="divVideoRemote2" class="video-frame">
+            <label id="txtRemote2">Remote 2</label>
+            <video id="video_remote2" autoplay></video>
         </div>
     </div>
-    
 
-    <script src="./assets/js/jquery.js"></script>
-    <script src="./assets/js/index.js"></script>
-    <script>
-        const dialpadTab = document.getElementById('dialpadTab');
-        const contactsTab = document.getElementById('contactsTab');
-        const container = document.getElementById('container');
-        const dialpad = document.getElementById('dialpad');
-        const contacts = document.getElementById('contacts');
-        const txtPhoneNumber = document.getElementById('txtPhoneNumber');
-        const dialpadButtons = document.querySelector('#dialpad .grid');
+    <!-- Controls -->
+    <div class="controls">
+        <input type="text" id="txtPhoneNumber1" placeholder="Enter SIP for Remote 1">
+        <button class="call-remote-1" onclick="sipCall('call-audiovideo', 'txtPhoneNumber1', 1)">Call Remote 1</button>
+        <br>
+        <input type="text" id="txtPhoneNumber2" placeholder="Enter SIP for Remote 2">
+        <button class="call-remote-2" onclick="sipCall('call-audiovideo', 'txtPhoneNumber2', 2)">Call Remote 2</button>
+        <br>
+        <button id="btnAnswer" onclick="answerCall();" style="display: none;">Answer Call</button>
+        <button id="hangupButton" onclick="hangUp();">Hang Up All</button>
+    </div>
 
-        // Dialpad buttons configuration
-        const buttons = [
-            '1', '2', '3',
-            '4', '5', '6',
-            '7', '8', '9',
-            '*', '0', '#'
-        ];
-
-        // Generate dialpad buttons dynamically
-        buttons.forEach(btn => {
-            const button = document.createElement('button');
-            button.className = 'w-12 h-12 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 active:scale-95 text-lg flex items-center justify-center transition';
-            button.textContent = btn;
-            button.addEventListener('click', () => handleNumberClick(btn));
-            dialpadButtons.appendChild(button);
-        });
-
-        // Handle number click
-        function handleNumberClick(num) {
-            txtPhoneNumber.value += num; // Append the clicked number to the input field
-        }
-
-        // Clear the input field
-        function clearNumber() {
-            txtPhoneNumber.value = '';
-        }
-
-        // Switch between Dialpad and Contacts tabs
-        dialpadTab.addEventListener('click', () => {
-            setActiveTab('dialpad');
-        });
-
-        contactsTab.addEventListener('click', () => {
-            setActiveTab('contacts');
-        });
-
-        function setActiveTab(tab) {
-            if (tab === 'dialpad') {
-                container.classList.remove('max-w-4xl');
-                container.classList.add('max-w-sm');
-                dialpadTab.classList.add('bg-blue-500', 'text-white', 'shadow-md');
-                dialpadTab.classList.remove('bg-white', 'text-gray-700', 'hover:bg-blue-100');
-                contactsTab.classList.remove('bg-blue-500', 'text-white', 'shadow-md');
-                contactsTab.classList.add('bg-white', 'text-gray-700', 'hover:bg-blue-100');
-                dialpad.classList.remove('hidden');
-                contacts.classList.add('hidden');
-            } else {
-                container.classList.remove('max-w-sm');
-                container.classList.add('max-w-4xl');
-                contactsTab.classList.add('bg-blue-500', 'text-white', 'shadow-md');
-                contactsTab.classList.remove('bg-white', 'text-gray-700', 'hover:bg-blue-100');
-                dialpadTab.classList.remove('bg-blue-500', 'text-white', 'shadow-md');
-                dialpadTab.classList.add('bg-white', 'text-gray-700', 'hover:bg-blue-100');
-                contacts.classList.remove('hidden');
-                dialpad.classList.add('hidden');
-            }
-        }
-
-    </script>
-
+    <script type="text/javascript" src="./assets/js/index.js"></script>
     <audio id="audio_remote" autoplay></audio>
     <audio id="ringtone" src="sounds/ringtone.wav" loop></audio>
     <audio id="ringbacktone" src="sounds/ringbacktone.wav" loop></audio>

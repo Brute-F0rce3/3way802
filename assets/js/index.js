@@ -1,23 +1,21 @@
 var sTransferNumber;
 var oRingTone, oRingbackTone;
-var oSipStack, oSipSessionRegister, oSipSessionCall, oSipSessionTransferCall;
-var videoRemote, videoLocal, audioRemote;
+var oSipStack, oSipSessionRegister, oSipSessionCall1, oSipSessionCall2;
+var videoRemote1, videoRemote2, videoLocal, audioRemote;
 var bFullScreen = false;
 var oNotifICall;
 var bDisableVideo = false;
-var viewVideoLocal, viewVideoRemote, viewLocalScreencast; // <video> (webrtc) or <div> (webrtc4all)
+var viewVideoLocal, viewVideoRemote1, viewVideoRemote2;
 var oConfigCall;
 var oReadyStateTimer;
 var realmm = "ipc.johnsamuel.in";
-var pvalue;
-var i=0;
-
 
 window.onload = function () {
     window.console && window.console.info && window.console.info("location=" + window.location);
 
     videoLocal = document.getElementById("video_local");
-    videoRemote = document.getElementById("video_remote");
+    videoRemote1 = document.getElementById("video_remote1");
+    videoRemote2 = document.getElementById("video_remote2");
     audioRemote = document.getElementById("audio_remote");
 
 
@@ -59,7 +57,6 @@ window.onload = function () {
         if (s_ndb == "true") SIPml.startNativeDebug();
     }
 
-    console.log(i+1);
     
     oReadyStateTimer = setInterval(function () {
         if (document.readyState === "complete") {
@@ -109,7 +106,8 @@ function postInit() {
 
     // FIXME: displays must be per session
     viewVideoLocal = videoLocal;
-    viewVideoRemote = videoRemote;
+    viewVideoRemote1 = videoRemote1;
+    viewVideoRemote2 = videoRemote2;
 
     if (!SIPml.isWebRtcSupported()) {
         if (confirm('Your browser don\'t support WebRTC.\naudio/video calls will be disabled.\nDo you want to download a WebRTC-capable browser?')) {
@@ -122,14 +120,14 @@ function postInit() {
     oConfigCall = {
         audio_remote: audioRemote,
         video_local: viewVideoLocal,
-        video_remote: viewVideoRemote,
-        screencast_window_id: 0x00000000, // entire desktop
+        video_remote: viewVideoRemote1, // Default remote video frame
+        screencast_window_id: 0x00000000,
         bandwidth: { audio: undefined, video: undefined },
         video_size: { minWidth: undefined, minHeight: undefined, maxWidth: undefined, maxHeight: undefined },
         events_listener: { events: '*', listener: onSipEventSession },
         sip_caps: [
-                        { name: '+g.oma.sip-im' },
-                        { name: 'language', value: '\"en,fr\"' }
+            { name: '+g.oma.sip-im' },
+            { name: 'language', value: '"en,fr"' }
         ]
     };
 }
@@ -139,9 +137,9 @@ function sipRegister() {
     // create SIP stack
     oSipStack = new SIPml.Stack({
         realm: "ipc.johnsamuel.in",
-        impi: "704",
-        impu: "sip:704@ipc.johnsamuel.in",
-        password: "704@704",
+        impi: "801",
+        impu: "sip:801@ipc.johnsamuel.in",
+        password: "801@801",
         display_name: "Sarath",
         websocket_proxy_url: ("wss://ipc.johnsamuel.in:7443"),
         outbound_proxy_url: (window.localStorage ? window.localStorage.getItem('org.doubango.expert.sip_outboundproxy_url') : null),
@@ -164,124 +162,25 @@ function sipRegister() {
     else return;
 }
 
-function sipCalll701() {
-    const callNumber = "701"; // Fixed number for this function
-
-    if (oSipStack && !oSipSessionCall) {
-        // Hide the main app and show the video container
-        document.getElementById('app').style.display = 'none';
-        const videoContainer = document.getElementById('divVideo');
-        videoContainer.classList.add('fullscreen');
-        videoContainer.classList.remove('hidden');
-
-        // Show the hangup button
-        document.getElementById('hangupButton').style.display = 'inline-block';
-
-        // Create a new SIP call session
-        oSipSessionCall = oSipStack.newSession("call-audiovideo", oConfigCall);
-
-        if (oSipSessionCall.call(callNumber) !== 0) {
-            // If the call fails
-            oSipSessionCall = null;
-            updateCallStatus('Failed to make call');
-            
-            // Restore the app UI
-            document.getElementById('app').style.display = 'flex';
-            videoContainer.classList.add('hidden');
-            videoContainer.classList.remove('fullscreen');
-        } else {
-            // If the call is initiated successfully
-            updateCallStatus('Calling 701...');
-        }
-    } else if (oSipSessionCall) {
-        // If there's already an ongoing call, accept it
-        updateCallStatus('Connecting...');
-        oSipSessionCall.accept(oConfigCall);
-    }
-}
-
-
-function sipCalll702() {
-    if (oSipSessionCall) {
-        // Accept the incoming call
-        txtCallStatus.innerHTML = '<i>Connecting...</i>';
-        oSipSessionCall.accept(oConfigCall);
-    } else {
-        // Create a new call session for an outgoing call
-        oSipSessionCall = oSipStack.newSession("call-audiovideo", oConfigCall);
-
-        var callNumber = "702"; // Default number
-
-        // Hide the app div and show the video section
-        document.getElementById('app').style.display = 'none';
-        document.getElementById('divVideo').style.display = 'flex';
-
-        // Make the call
-        if (oSipSessionCall.call(callNumber) !== 0) {
-            oSipSessionCall = null;
-            txtCallStatus.innerHTML = 'Failed to make call';
-            hangUp.disabled = true;
-
-            // Restore the app div and hide the video section on failure
-            document.getElementById('app').style.display = 'flex';
-            document.getElementById('divVideo').style.display = 'none';
-        } else {
-            txtCallStatus.innerHTML = '<i>Call initiated...</i>';
-            hangUp.disabled = false;
-        }
-    }
-}
-
-function sipCalll703() {
-    if (oSipSessionCall) {
-        // Accept the incoming call
-        txtCallStatus.innerHTML = '<i>Connecting...</i>';
-        oSipSessionCall.accept(oConfigCall);
-    } else {
-        // Create a new call session for an outgoing call
-        oSipSessionCall = oSipStack.newSession("call-audiovideo", oConfigCall);
-
-        var callNumber = "703"; // Default number
-
-        // Hide the app div and show the video section
-        document.getElementById('app').style.display = 'none';
-        document.getElementById('divVideo').style.display = 'flex';
-
-        // Make the call
-        if (oSipSessionCall.call(callNumber) !== 0) {
-            oSipSessionCall = null;
-            txtCallStatus.innerHTML = 'Failed to make call';
-            hangUp.disabled = true;
-
-            // Restore the app div and hide the video section on failure
-            document.getElementById('app').style.display = 'flex';
-            document.getElementById('divVideo').style.display = 'none';
-        } else {
-            txtCallStatus.innerHTML = '<i>Call initiated...</i>';
-            hangUp.disabled = false;
-        }
-    }
-}
-
 function hangUp() {
-    console.log("Hang Up button clicked");
-    if (oSipSessionCall) {
-        console.log("Ending call..."); // Log the state of oSipSessionCall
-        updateCallStatus('Terminating the call...');
-
-        // Terminate the call
-        oSipSessionCall.hangup({
-            events_listener: {
-                events: '*',
-                listener: onSipEventSession,
-            },
-        });
-
-        // Reset UI
-        resetCallUI();
-    } else {
-        console.log("No active call to terminate.");
+    if (oSipSessionCall1) {
+        oSipSessionCall1.hangup();
+        oSipSessionCall1 = null;
     }
+
+    if (oSipSessionCall2) {
+        oSipSessionCall2.hangup();
+        oSipSessionCall2 = null;
+    }
+
+    updateCallStatus("All calls terminated.");
+    resetCallUI();
+}
+
+function resetCallUI() {
+    document.getElementById("app").style.display = "flex";
+    document.getElementById("divVideo").classList.add("hidden");
+    document.getElementById("divVideo").classList.remove("fullscreen");
 }
 
 // Helper function to reset UI
@@ -293,53 +192,104 @@ function resetCallUI() {
     txtCallStatus.innerHTML = 'Call ended';
 }
 
+function sipCall(s_type, targetId, callIndex) {
+    const targetNumber = document.getElementById(targetId).value;
+    if (!oSipStack || !targetNumber) {
+        console.error("SIP stack not initialized or target number is missing.");
+        return;
+    }
 
-function sipCall(s_type) {
-    if (oSipStack && !oSipSessionCall && txtPhoneNumber.value) {
-        // Hide the main app and show the video container
-        document.getElementById('app').style.display = 'none';
-        const videoContainer = document.getElementById('divVideo');
-        videoContainer.classList.add('fullscreen');
-        videoContainer.classList.remove('hidden');
+    let callSession;
+    let videoRemote;
 
-        // Show the hangup button
-        document.getElementById('hangupButton').style.display = 'inline-block';
+    if (callIndex === 1 && !oSipSessionCall1) {
+        callSession = oSipSessionCall1 = oSipStack.newSession(s_type, {
+            ...oConfigCall,
+            video_remote: viewVideoRemote1, // Remote Video 1
+        });
+        videoRemote = videoRemote1;
+    } else if (callIndex === 2 && !oSipSessionCall2) {
+        callSession = oSipSessionCall2 = oSipStack.newSession(s_type, {
+            ...oConfigCall,
+            video_remote: viewVideoRemote2, // Remote Video 2
+        });
+        videoRemote = videoRemote2;
+    } else {
+        console.error("Invalid call index or session already exists.");
+        return;
+    }
 
-        // Create a new SIP call session
-        oSipSessionCall = oSipStack.newSession(s_type, oConfigCall);
-        if (oSipSessionCall.call(txtPhoneNumber.value) !== 0) {
-            oSipSessionCall = null;
-            updateCallStatus('Failed to make call');
-            document.getElementById('app').style.display = 'flex';
-            videoContainer.classList.add('hidden');
-            videoContainer.classList.remove('fullscreen');
-        } else {
-            updateCallStatus('Calling...');
-        }
+    if (callSession.call(targetNumber) !== 0) {
+        console.error(`Failed to call ${targetNumber}`);
+        if (callIndex === 1) oSipSessionCall1 = null;
+        if (callIndex === 2) oSipSessionCall2 = null;
+    } else {
+        console.log(`Calling ${targetNumber} for Call ${callIndex}`);
+        updateCallStatus(`Calling ${targetNumber}...`);
+        videoRemote.style.opacity = 1;
     }
 }
 
-
-function answerCall() {
-    if (oSipSessionCall) {
-        oSipSessionCall.accept(oConfigCall);
-
-        // Stop the ringtone
-        stopRingTone();
-
-        // Update UI for the video container
-        document.getElementById('app').style.display = 'none';
-        const videoContainer = document.getElementById('divVideo');
-        videoContainer.classList.add('fullscreen');
-        videoContainer.classList.remove('hidden');
-
-        // Hide the Answer button and show the Hangup button
-        document.getElementById('btnAnswer').style.display = 'none';
-        document.getElementById('hangupButton').style.display = 'inline-block';
-
-        // Update the call status
-        updateCallStatus('Call in Progress...');
+function answerCall(session) {
+    if (!session) {
+        console.error('No session to answer.');
+        return;
     }
+
+    console.log('Accepting the call...');
+    
+    // For a conference call, we will handle multiple remote video elements
+    const remoteVideoElement = session === oSipSessionCall1 ? videoRemote1 : (session === oSipSessionCall2 ? videoRemote2 : null);
+
+    if (!remoteVideoElement) {
+        console.error('No remote video element found for this session.');
+        return;
+    }
+
+    // Accept the call and pass the local and remote video streams
+    session.accept({
+        video_local: videoLocal,    // Local video stream
+        video_remote: remoteVideoElement, // Use the appropriate remote video element
+        audio_remote: audioRemote,  // Remote audio stream for all participants
+    });
+
+    // Stop the ringtone (if playing)
+    stopRingTone();
+
+    // Update the video container UI
+    const videoContainer = document.getElementById('divVideo');
+    videoContainer.classList.remove('hidden');
+    videoContainer.classList.add('fullscreen');
+
+    // Hide the "Answer" button
+    document.getElementById('btnAnswer').style.display = 'none';
+
+    // Update the call status
+    const label = session === oSipSessionCall1 ? 'Remote 1' : 'Remote 2';
+    updateCallStatus(`Call accepted and displayed in ${label}.`);
+}
+
+function setupIncomingCall(session, videoElement, label) {
+    // Configure the session with the appropriate video elements
+    session.setConfiguration({
+        video_remote: videoElement,  // Assign remote video
+        video_local: videoLocal,    // Local video for the call
+        audio_remote: audioRemote,  // Remote audio for the call
+        events_listener: { events: '*', listener: onSipEventSession }, // Bind session events
+    });
+
+    // Show the "Answer" button
+    const answerButton = document.getElementById('btnAnswer');
+    answerButton.style.display = 'block';
+
+    // Dynamically bind the session to the "Answer" button's click handler
+    answerButton.onclick = function () {
+        console.log(`Answering call for ${label}`);
+        answerCall(session); // Pass the session object to answer the call
+    };
+
+    // Update the call status to indicate an incoming call
+    updateCallStatus(`Incoming call for ${label}`);
 }
 
 function sipSendDTMF(c) {
@@ -428,22 +378,35 @@ function onDivCallCtrlMouseMove(evt) {
 }
 
 function uiOnConnectionEvent(b_connected, b_connecting) { // should be enum: connecting, connected, terminating, terminated
-    btnCall.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
-    hangUp.disabled = !oSipSessionCall;
+    hangUp.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
 }
 
 function uiVideoDisplayEvent(b_local, b_added) {
-    var o_elt_video = b_local ? videoLocal : videoRemote;
-
+    var o_elt_video;
+    
+    // Check which session is active and assign the correct remote video
+    if (b_local) {
+        o_elt_video = videoLocal;
+    } else {
+        // If session 1 is active, use videoRemote1, otherwise use videoRemote2
+        o_elt_video = oSipSessionCall1 ? videoRemote1 : (oSipSessionCall2 ? videoRemote2 : null);
+    }
+    
+    if (!o_elt_video) {
+        console.error('No valid video element found.');
+        return;
+    }
+    
     if (b_added) {
         o_elt_video.style.opacity = 1;
         uiVideoDisplayShowHide(true);
-    }
-    else {
+    } else {
         o_elt_video.style.opacity = 0;
         fullScreen(false);
     }
 }
+
+
 
 function uiVideoDisplayShowHide(b_show) {
     const divVideo = document.getElementById("divVideo");
@@ -543,11 +506,116 @@ function uiCallTerminated(s_description) {
 
 let txtCallStatus = document.getElementById("txtCallStatus");
 function updateCallStatus(message) {
+    const txtCallStatus = document.getElementById("txtCallStatus");
     if (txtCallStatus) {
-        txtCallStatus.textContent = message; // Update the call status text
-        txtCallStatus.style.display = "block"; // Ensure it's visible
+        txtCallStatus.textContent = message;
+        txtCallStatus.style.display = "block";
     } else {
-        console.error('Unable to update call status. Element "txtCallStatus" not found.');
+        console.error("Call status element not found.");
+    }
+}
+
+function answerCall(session) {
+    if (!session) {
+        console.error('No session to answer.');
+        return;
+    }
+
+    console.log('Accepting the call...');
+    
+    // For a conference call, we will handle multiple remote video elements
+    const remoteVideoElement = session === oSipSessionCall1 ? videoRemote1 : (session === oSipSessionCall2 ? videoRemote2 : null);
+
+    if (!remoteVideoElement) {
+        console.error('No remote video element found for this session.');
+        return;
+    }
+
+    // Accept the call and pass the local and remote video streams
+    session.accept({
+        video_local: videoLocal,    // Local video stream
+        video_remote: remoteVideoElement, // Use the appropriate remote video element
+        audio_remote: audioRemote,  // Remote audio stream for all participants
+    });
+
+    // Stop the ringtone (if playing)
+    stopRingTone();
+
+    // Update the video container UI
+    const videoContainer = document.getElementById('divVideo');
+    videoContainer.classList.remove('hidden');
+    videoContainer.classList.add('fullscreen');
+
+    // Hide the "Answer" button
+    document.getElementById('btnAnswer').style.display = 'none';
+
+    // Update the call status
+    const label = session === oSipSessionCall1 ? 'Remote 1' : 'Remote 2';
+    updateCallStatus(`Call accepted and displayed in ${label}.`);
+}
+
+function setupIncomingCall(session, videoElement, label) {
+    // Configure the session with the appropriate video elements
+    session.setConfiguration({
+        video_remote: videoElement,  // Assign remote video
+        video_local: videoLocal,    // Local video for the call
+        audio_remote: audioRemote,  // Remote audio for the call
+        events_listener: { events: '*', listener: onSipEventSession }, // Bind session events
+    });
+
+    // Show the "Answer" button
+    const answerButton = document.getElementById('btnAnswer');
+    answerButton.style.display = 'block';
+
+    // Dynamically bind the session to the "Answer" button's click handler
+    answerButton.onclick = function () {
+        console.log(`Answering call for ${label}`);
+        answerCall(session); // Pass the session object to answer the call
+    };
+
+    // Update the call status to indicate an incoming call
+    updateCallStatus(`Incoming call for ${label}`);
+}
+
+function setupConferenceCall(session, participantId) {
+    // Assign a unique video element for each participant
+    let videoRemoteElement;
+    if (participantId === 1) {
+        videoRemoteElement = videoRemote1;
+    } else if (participantId === 2) {
+        videoRemoteElement = videoRemote2;
+    } else if (participantId === 3) {
+        videoRemoteElement = videoRemote3;
+    }
+    // Add more cases as needed for additional participants...
+
+    session.setConfiguration({
+        video_remote: videoRemoteElement, // Assign the remote video to the correct element
+        video_local: videoLocal,  // Local video for the current participant
+        audio_remote: audioRemote, // Audio for the current participant
+        events_listener: { events: '*', listener: onSipEventSession }, // Event listener for the session
+    });
+    
+    // Dynamically show the incoming call info for all participants
+    updateCallStatus(`Incoming conference call for Participant ${participantId}`);
+}
+
+
+function handleIncomingCall(newSession) {
+    console.log('Incoming call detected.');
+    if (oSipSessionCall1 && oSipSessionCall2) {
+        console.log('Already handling two calls. Rejecting the new call.');
+        newSession.reject();
+        return;
+    }
+
+    const availableSession = !oSipSessionCall1 ? 1 : 2;
+    if (availableSession === 1) {
+        oSipSessionCall1 = newSession;
+        setupIncomingCall(newSession, videoRemote1, 'Remote 1');
+    } else {
+        oSipSessionCall2 = newSession;
+        setupIncomingCall(newSession, videoRemote2, 'Remote 2');
     }
 }
 
@@ -556,28 +624,20 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
     tsk_utils_log_info('==stack event = ' + e.type);
     switch (e.type) {
         case 'started':
-            {
-                // catch exception for IE (DOM not ready)
-                try {
-                    // LogIn (REGISTER) as soon as the stack finish starting
-                    oSipSessionRegister = this.newSession('register', {
-                        expires: 200,
-                        events_listener: { events: '*', listener: onSipEventSession },
-                        sip_caps: [
-                                    { name: '+g.oma.sip-im', value: null },
-                                    //{ name: '+sip.ice' }, // rfc5768: FIXME doesn't work with Polycom TelePresence
-                                    { name: '+audio', value: null },
-                                    { name: 'language', value: '\"en,fr\"' }
-                        ]
-                    });
-                    oSipSessionRegister.register();
-                }
-                catch (e) {
-                    txtRegStatus.value = txtRegStatus.innerHTML = "<b>1:" + e + "</b>";
-                    // btnRegister.disabled = false;
-                }
-                break;
+            try {
+                oSipSessionRegister = this.newSession('register', {
+                    expires: 200,
+                    events_listener: { events: '*', listener: onSipEventSession },
+                });
+                oSipSessionRegister.register();
+            } catch (err) {
+                console.error("Error during registration:", err);
             }
+            break;
+        case 'failed_to_start':
+        case 'failed_to_stop':
+            console.error(`SIP stack ${e.type}: ${e.description}`);
+            break;
         case 'stopping': case 'stopped': case 'failed_to_start': case 'failed_to_stop':
             {
                 var bFailure = (e.type == 'failed_to_start') || (e.type == 'failed_to_stop');
@@ -598,25 +658,19 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
                 break;
             }
 
-        case 'i_new_call':
+            case 'i_new_call':
             {
-                if (oSipSessionCall) {
-                    // do not accept the incoming call if we're already 'in call'
-                    e.newSession.hangup(); // comment this line for multi-line support
-                }
-                else {
-                    oSipSessionCall = e.newSession;
-                    // start listening for events
-                    oSipSessionCall.setConfiguration(oConfigCall);
+                const incomingSession = e.newSession;
 
-                    document.getElementById('btnAnswer').style.display = 'inline-block';
-                    document.getElementById('hangupButton').style.display = 'inline-block';
-            
-                    startRingTone();
-
-                    var sRemoteNumber = (oSipSessionCall.getRemoteFriendlyName() || 'unknown');
-                    txtCallStatus.innerHTML = "<i>Incoming call from [<b>" + sRemoteNumber + "</b>]</i>";
-                    showNotifICall(sRemoteNumber);
+                if (oSipSessionCall1 && oSipSessionCall2) {
+                    console.log('Already handling two calls. Rejecting the new call.');
+                    incomingSession.reject();
+                } else if (!oSipSessionCall1) {
+                    oSipSessionCall1 = incomingSession;
+                    setupIncomingCall(oSipSessionCall1, videoRemote1, 'Remote 1');
+                } else {
+                    oSipSessionCall2 = incomingSession;
+                    setupIncomingCall(oSipSessionCall2, videoRemote2, 'Remote 2');
                 }
                 break;
             }
@@ -641,51 +695,57 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
 };
 
 function onSipEventSession(e /* SIPml.Session.Event */) {
-    tsk_utils_log_info('==session event = ' + e.type);
+    console.log('==session event = ' + e.type);
+
+    // Check if the event is related to oSipSessionCall1 or oSipSessionCall2
+    const session = e.session;
+    const isSessionCall1 = session === oSipSessionCall1;
+    const isSessionCall2 = session === oSipSessionCall2;
 
     switch (e.type) {
-        case 'connecting': case 'connected':
+        case 'connecting':
+        case 'connected':
             {
-                var bConnected = (e.type == 'connected');
-                if (e.session == oSipSessionRegister) {
+                const bConnected = (e.type === 'connected');
+                if (session === oSipSessionRegister) {
                     uiOnConnectionEvent(bConnected, !bConnected);
                     updateCallStatus('Online');
-                }
-                else if (e.session == oSipSessionCall) {
-                    btnHangUp.value = 'HangUp';
-                    btnCall.disabled = true;
-                    btnHangUp.disabled = false;
-                    btnTransfer.disabled = false;
-                    if (window.btnBFCP) window.btnBFCP.disabled = false;
+                } else if (isSessionCall1 || isSessionCall2) {
+                    const callIndex = isSessionCall1 ? 1 : 2;
+                    console.log(`Session ${callIndex} is ${e.type}.`);
 
                     if (bConnected) {
                         stopRingbackTone();
                         stopRingTone();
-
                         if (oNotifICall) {
                             oNotifICall.cancel();
                             oNotifICall = null;
                         }
                     }
 
-                    txtCallStatus.innerHTML = "<i>" + e.description + "</i>";
+                    txtCallStatus.innerHTML = `<i>${e.description}</i>`;
                     divCallOptions.style.opacity = bConnected ? 1 : 0;
 
-                    if (SIPml.isWebRtc4AllSupported()) { // IE don't provide stream callback
+                    if (SIPml.isWebRtc4AllSupported()) {
+                        // IE doesn't provide stream callbacks
                         uiVideoDisplayEvent(false, true);
                         uiVideoDisplayEvent(true, true);
                     }
                 }
                 break;
-            } // 'connecting' | 'connected'
-        case 'terminating': case 'terminated':
-            case 'terminated':
+            }
+        case 'terminating':
+        case 'terminated':
             {
-                if (e.session == oSipSessionCall) {
+                if (isSessionCall1 || isSessionCall2) {
+                    const callIndex = isSessionCall1 ? 1 : 2;
+                    console.log(`Session ${callIndex} is ${e.type}.`);
                     updateCallStatus('Call terminated');
-                    oSipSessionCall = null;
 
-                    // Reset the UI
+                    if (isSessionCall1) oSipSessionCall1 = null;
+                    if (isSessionCall2) oSipSessionCall2 = null;
+
+                    // Reset UI
                     document.getElementById('app').style.display = 'flex';
                     const videoContainer = document.getElementById('divVideo');
                     videoContainer.classList.add('hidden');
@@ -696,62 +756,43 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
                 }
                 break;
             }
-
-
         case 'm_stream_video_local_added':
             {
-                if (e.session == oSipSessionCall) {
+                if (isSessionCall1 || isSessionCall2) {
                     uiVideoDisplayEvent(true, true);
-                }
-                break;
-            }
-        case 'm_stream_video_local_removed':
-            {
-                if (e.session == oSipSessionCall) {
-                    uiVideoDisplayEvent(true, false);
                 }
                 break;
             }
         case 'm_stream_video_remote_added':
             {
-                if (e.session == oSipSessionCall) {
+                if (isSessionCall1 || isSessionCall2) {
                     uiVideoDisplayEvent(false, true);
                 }
                 break;
             }
+        case 'm_stream_video_local_removed':
         case 'm_stream_video_remote_removed':
             {
-                if (e.session == oSipSessionCall) {
-                    uiVideoDisplayEvent(false, false);
+                if (isSessionCall1 || isSessionCall2) {
+                    uiVideoDisplayEvent(e.type.includes('local'), false);
                 }
-                break;
-            }
-        case 'm_stream_audio_local_added':
-        case 'm_stream_audio_local_removed':
-        case 'm_stream_audio_remote_added':
-        case 'm_stream_audio_remote_removed':
-            {
-                break;
-            }
-        case 'i_ect_new_call':
-            {
-                oSipSessionTransferCall = e.session;
                 break;
             }
         case 'i_ao_request':
             {
-                if (e.session == oSipSessionCall) {
-                    var iSipResponseCode = e.getSipResponseCode();
-                    if (iSipResponseCode == 180 || iSipResponseCode == 183) {
+                if (isSessionCall1 || isSessionCall2) {
+                    const callIndex = isSessionCall1 ? 1 : 2;
+                    const iSipResponseCode = e.getSipResponseCode();
+                    if (iSipResponseCode === 180 || iSipResponseCode === 183) {
                         startRingbackTone();
-                        updateCallStatus('Remote ringing...');
+                        updateCallStatus(`Session ${callIndex} is ringing...`);
                     }
                 }
                 break;
             }
         case 'm_early_media':
             {
-                if (e.session == oSipSessionCall) {
+                if (isSessionCall1 || isSessionCall2) {
                     stopRingbackTone();
                     stopRingTone();
                     updateCallStatus('Early media started');
@@ -760,8 +801,8 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
             }
         case 'm_bfcp_info':
             {
-                if (e.session == oSipSessionCall) {
-                    txtCallStatus.innerHTML = 'BFCP Info: <i>' + e.description + '</i>';
+                if (isSessionCall1 || isSessionCall2) {
+                    txtCallStatus.innerHTML = `BFCP Info: <i>${e.description}</i>`;
                 }
                 break;
             }
