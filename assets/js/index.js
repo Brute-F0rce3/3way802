@@ -137,9 +137,9 @@ function sipRegister() {
     // create SIP stack
     oSipStack = new SIPml.Stack({
         realm: "ipc.johnsamuel.in",
-        impi: "802",
-        impu: "sip:802@ipc.johnsamuel.in",
-        password: "802@802",
+        impi: "801",
+        impu: "sip:801@ipc.johnsamuel.in",
+        password: "801@801",
         display_name: "Sarath",
         websocket_proxy_url: ("wss://ipc.johnsamuel.in:7443"),
         outbound_proxy_url: (window.localStorage ? window.localStorage.getItem('org.doubango.expert.sip_outboundproxy_url') : null),
